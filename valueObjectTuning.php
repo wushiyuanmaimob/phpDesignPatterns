@@ -6,6 +6,7 @@
  * Time: 下午1:32
  */
 
+namespace phpDesignPatterns\valueObjectTuning;
 class Dollar
 {
     protected $amount;
