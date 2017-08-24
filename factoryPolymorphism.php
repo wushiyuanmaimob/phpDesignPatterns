@@ -89,3 +89,109 @@ class Utility extends Property
         }
     }
 }
+
+class PropertyInfo
+{
+    const TYPE_KEY = 0;
+    const PRICE_KEY = 1;
+    const COLOR_KEY = 2;
+    const RENT_KEY = 3;
+
+    public $type;
+    public $price;
+    public $color;
+    public $rent;
+
+    public function __construct($props)
+    {
+        $this->type = $this->propValue($props, 'type', self::TYPE_KEY);
+        $this->price = $this->propValue($props, 'price', self::PRICE_KEY);
+        $this->color = $this->propValue($props, 'color', self::COLOR_KEY);
+        $this->rent = $this->propValue($props, 'rent', self::RENT_KEY);
+    }
+
+    protected function propValue($props, $prop, $key)
+    {
+        if(array_key_exists($key, $props)) {
+            return $this->$prop = $props[$key];
+        }
+    }
+}
+
+class Assessor
+{
+    protected $game;
+    protected $prop_info = [
+        'Mediterranean Ave.'    => ['Street', 60, 'Purple', 2],
+        'Baltic Ave'    => ['Street', 60, 'Purple', 2]
+    ];
+    public function setGame($game)
+    {
+        $this->game = $game;
+    }
+    public function getProperty($name)
+    {
+        $prop_info = $this->getPropInfo($name);
+        switch ($prop_info->type) {
+            case 'Street':
+                $prop = new Street($this->game, $name, $prop_info->price);
+                $prop->color = $prop_info->color;
+                $prop->setRent($prop_info->rent);
+                return $prop;
+                break;
+            case 'RailRoad':
+                return new RailRoad($this->game, $name, $prop_info->price);
+                break;
+            case 'Utility':
+                return new Utility($this->game, $name, $prop_info->price);
+                braek;
+        }
+    }
+
+    protected function getPropInfo($name)
+    {
+        try {
+            if (!array_key_exists($name, $this->prop_info)) {
+                throw new InvalidPropertyNameException($name);
+            }
+            return new PropertyInfo($this->prop_info[$name]);
+        }catch (InvalidPropertyNameException $e) {
+            echo '【' . $e->getCode() . '】' . $e->getMessage();
+            exit();
+        }
+    }
+}
+
+class InvalidPropertyNameException extends Exception
+{
+
+}
+
+class testFactoryPolymorphism extends PHPUnit_Framework_TestCase
+{
+    public function testPropertyInfo()
+    {
+        $list = ['type', 'price', 'color', 'rent'];
+        $this->assertInstanceOf('PropertyInfo', $testprop = new PropertyInfo($list));
+        foreach ($list as $prop) {
+            $this->assertEquals($prop, $testprop->$prop);
+        }
+    }
+
+    public function testPropertyInfoMissingColorRent()
+    {
+        $list = ['type', 'price'];
+        $this->assertInstanceOf('PropertyInfo', $testprop = new PropertyInfo($list));
+        foreach ($list as $prop) {
+            $this->assertEquals($prop, $testprop->$prop);
+        }
+        $this->assertNull($testprop->color);
+        $this->assertNull($testprop->color);
+    }
+
+    public function testAssessor()
+    {
+        $assessor = new Assessor();
+        $assessor->getProperty('qBall');
+    }
+}
