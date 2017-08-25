@@ -5,6 +5,7 @@
  * Date: 2017/8/22
  * Time: 下午5:22
  */
+namespace phpDesignPatterns\factory;
 
 //工厂模式的任务就是把对象的创建过程都封装起来，然后返回一个所需要的新对象。
 
